@@ -12,6 +12,11 @@ class LeaderBoardController extends Controller
     {
         $query = User::query();
 
+        if ($request->input('search') != '') {
+            $userId = $request->input('search');
+            $query->where('id', $userId);
+        }
+
         if ($request->has('filter') && $request->input('filter') !== '') {
             $filter = $request->input('filter');
             $date = now();
@@ -26,16 +31,8 @@ class LeaderBoardController extends Controller
             }
         }
 
-        // Search by user ID
-        if ($request->has('search')) {
-            $userId = $request->input('search');
-            $query->where('id', $userId);
-        }
-
-        // Calculate rank and get leaderboard data
         $leaderboardData = $query->get();
 
-        // Check if the request is AJAX
         if ($request->ajax()) {
             return response()->json(['leaderboardData' => $leaderboardData]);
         }

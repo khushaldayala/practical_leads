@@ -13,15 +13,12 @@ class RankCalculator
         $currentRank = 0;
         $previousPoints = null;
 
-        foreach ($users as $index => $user) {
-            if ($previousPoints !== null && $user->points === $previousPoints) {
-                $rank = $currentRank;
-            } else {
-                $rank = $index + 1;
-                $currentRank = $rank;
+        foreach ($users as $user) {
+            if ($previousPoints === null || $user->points !== $previousPoints) {
+                $currentRank++;
             }
 
-            $user->rank = $rank;
+            $user->rank = $currentRank;
             $user->save();
 
             $previousPoints = $user->points;

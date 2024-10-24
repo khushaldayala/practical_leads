@@ -22,8 +22,8 @@
                     <select name="filter" class="form-control" id="filter">
                         <option value="">Select Filter</option>
                         <option value="day">Today</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
                     </select>
                 </div>
                 <div class="col-auto">
@@ -65,17 +65,14 @@
     <script>
         $(document).ready(function() {
 
-            // Initial call to load leaderboard data
             showleads();
 
-            // Function to fetch and display leaderboard data
             function showleads(filterData = {}) {
                 $.ajax({
                     url: "{{ route('leaderboard.index') }}",
                     type: "GET",
                     data: filterData,
                     success: function(data) {
-                        // Update the table with the new data
                         let rows = '';
                         $.each(data.leaderboardData, function(index, entry) {
                             rows += `<tr>
@@ -93,30 +90,29 @@
                 });
             }
 
-            // Handle filter button click
             $('#filterButton').click(function() {
-                // Serialize the form data and pass it to showleads
                 const filterData = $('#filterForm').serialize();
-                showleads(filterData);
+                if ($('#search').val() || $('#filter').val()) {
+                    showleads(filterData);
+                } else {
+                    toastr.error('Please select a filter.');
+                }
             });
 
-            // Handle recalculate button click
             $('#recalculateButton').click(function() {
-                $("filter").val('');
-                $("search").val('');
+                document.getElementById('search').value = '';
+                document.getElementById('filter').value = '';
                 $.ajax({
                     url: "{{ route('leaderboard.recalculate') }}",
                     type: "POST",
                     data: {
-                        _token: '{{ csrf_token() }}' // Include CSRF token for security
+                        _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
-                        toastr.success(response.message); // Show success message
-                        // After recalculating, fetch all leaderboard data
-                        showleads(); // No filter applied
+                        toastr.success(response.message);
+                        showleads();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        // Display a more informative error message
                         var errorMessage = jqXHR.responseJSON?.message || 'An error occurred while recalculating ranks.';
                         toastr.error(errorMessage);
                     }
